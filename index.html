@@ -879,6 +879,8 @@
             ma_history: [],
 
             is_running: false,
+            is_analyzing: false, // YENİ: Başlangıç analizi durumu
+            first_trade_done: false, // YENİ: İlk işlem kontrolü
             muted: false,
             avg_buy_price: 0.0,
             peak_price: 0.0,
@@ -928,7 +930,31 @@
                 aiBadge.className = `font-bold ${colorClass}`;
             },
 
-            // YENİ: USDT/TRY Kurunu Çekme Fonksiyonu
+            // YENİ: 1 Aylık Geçmiş Veri Analizi
+            performInitialAnalysis: async function () {
+                this.is_analyzing = true;
+                this.log("⏳ 1 Aylık piyasa verisi analiz ediliyor... Lütfen bekleyin.", "warning");
+
+                try {
+                    // 1 aylık veri (180 adet 4 saatlik mum)
+                    const response = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=180');
+                    const data = await response.json();
+
+                    if (data && data.length > 0) {
+                        const prices = data.map(d => parseFloat(d[4]));
+                        const avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
+                        const latestPrice = prices[prices.length - 1];
+                        const volatility = (Math.max(...prices) - Math.min(...prices)) / avgPrice * 100;
+
+                        this.log(`✅ Analiz Tamamlandı: Ortalama $${avgPrice.toFixed(0)}, Volatilite %${volatility.toFixed(1)}`, "success");
+                        this.log(`🚀 İlk işlem için piyasa gözlemleniyor. (İlk bütçe: $100)`, "system");
+                    }
+                } catch (e) {
+                    this.log("⚠️ Analiz sırasında hata oluştu, standart moda geçiliyor.", "error");
+                } finally {
+                    this.is_analyzing = false;
+                }
+            },
             fetchTryRate: async function () {
                 const now = Date.now();
                 // Her 60 saniyede bir kuru güncelle (API limitini korumak için)
@@ -996,7 +1022,7 @@
                 // Kâr transferi sadece işlem kapandığında (sellAll içinde) yapılacak.
                 this.updateFloatingProfitStatus();
 
-                if (this.is_running && rsi !== null) {
+                if (this.is_running && !this.is_analyzing && rsi !== null) {
                     this.evaluateStrategy(rsi);
                 }
 
@@ -1025,7 +1051,12 @@
                     btn.classList.remove('bg-blue-600', 'hover:bg-blue-500');
                     btn.classList.add('bg-red-600', 'hover:bg-red-500');
                     btn.innerHTML = '<i class="fa-solid fa-stop"></i> DURDUR';
-                    this.log("AI Motoru Aktif. Hedef: Sabit $10 Kâr", "system");
+                    this.log("AI Motoru Başlatıldı.", "system");
+
+                    // İşlem yoksa ve ilk işlem yapılmadıysa analizi başlat
+                    if (this.btc_amount === 0 && !this.first_trade_done) {
+                        this.performInitialAnalysis();
+                    }
                 } else {
                     btn.classList.remove('bg-red-600', 'hover:bg-red-500');
                     btn.classList.add('bg-blue-600', 'hover:bg-blue-500');
@@ -1099,34 +1130,31 @@
                         this.sellAll(`HEDEF ULAŞILDI (+$${netProfit.toFixed(2)})`);
                         this.lastAutoTrade = now;
                     }
-                    // Eğer kâr 10$ altındaysa kesinlikle satma (Patient Holding)
                     return;
                 }
 
-                // 2. ALIM MANTIĞI: SADECE SERMAYE HAZIRSA (1000 USD)
-                if (this.budget >= 1000) {
-                    // AI Giriş Kararı: RSI Düşük olduğunda tüm sermaye ile gir
-                    if (rsi < this.config.rsiBuyThreshold) {
-                        this.buy(1000, 1000, `AI Giriş Sinyali (RSI ${rsi.toFixed(1)})`);
+                // 2. ALIM MANTIĞI
+                if (this.budget >= 100) {
+                    // İlk alım 100$, sonrakiler 1000$ (disiplin kuralı korunur)
+                    const targetAmount = !this.first_trade_done ? 100 : 1000;
+
+                    if (this.budget >= targetAmount && rsi < this.config.rsiBuyThreshold) {
+                        this.buy(targetAmount, targetAmount, `AI Giriş Sinyali (RSI ${rsi.toFixed(1)})`);
                         this.lastAutoTrade = now;
                     }
                 }
             },
 
             buy: function (usdAmount, fixedCapital, reason) {
-                // Her zaman tam olarak 1000 USD (veya bakiye yetersizse tüm bütçe)
-                if (this.budget >= 1000) usdAmount = 1000;
-                else usdAmount = this.budget;
-
+                // Bakiyeye göre güvenli tutar belirle
+                if (usdAmount > this.budget) usdAmount = this.budget;
                 if (usdAmount < 10) return;
 
                 const fee = usdAmount * this.config.commissionRate;
                 const netAmount = usdAmount - fee;
                 const btc = netAmount / this.current_price;
 
-                // Yatırılan ana parayı kaydet (Kâr hesabı için kritik)
                 this.invested_capital = usdAmount;
-
                 const totalValueBefore = this.btc_amount * this.avg_buy_price;
                 const newValue = netAmount;
                 const totalBTC = this.btc_amount + btc;
@@ -1134,6 +1162,7 @@
 
                 this.budget -= usdAmount;
                 this.btc_amount += btc;
+                this.first_trade_done = true; // İlk işlem artık yapıldı
 
                 this.peak_price = this.current_price;
                 this.addTransaction("BUY", this.current_price, usdAmount, fee, netAmount, btc);
