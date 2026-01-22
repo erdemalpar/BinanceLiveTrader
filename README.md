@@ -2,6 +2,13 @@
 
 ![Binance Live Trader Banner](assets/banner.png)
 
+<p align="center">
+  <a href="https://erdemalpar.github.io/BinanceLiveTrader/">
+    <img src="assets/demo_button.svg" width="280" alt="Canlı Demo Butonu">
+  </a>
+</p>
+
+
 Binance Live Trader, gerçek zamanlı piyasa verilerini kullanarak kullanıcıya gelişmiş grafikler, AI tabanlı strateji önerileri ve canlı haber analizi sunan modern bir ticaret arayüzüdür. Tamamen tarayıcı üzerinde çalışır ve Binance API'den WebSocket aracılığıyla canlı veri akışı sağlar.
 
 ## ✨ Öne Çıkan Özellikler
