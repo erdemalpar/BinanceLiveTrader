@@ -346,6 +346,22 @@
                             </div>
                         </div>
 
+                        <!-- YENİ: Oto-Satış Kâr Hedefi -->
+                        <div class="pt-2">
+                            <label
+                                class="text-xs text-slate-400 mb-1 block uppercase font-bold tracking-wider">Oto-Satış
+                                Kâr Hedefi (%)</label>
+                            <div class="flex gap-2">
+                                <div class="relative flex-1">
+                                    <input type="number" id="otoSatisInput" value="0" step="0.1"
+                                        class="w-full bg-slate-900/50 border border-slate-700 rounded p-2 text-right text-sm text-blue-400 focus:border-blue-500 outline-none">
+                                    <span class="absolute left-2 top-2 text-slate-500 text-xs">%</span>
+                                </div>
+                                <button onclick="realBot.updateConfig()"
+                                    class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded text-xs font-bold transition whitespace-nowrap active:scale-95">KAYDET</button>
+                            </div>
+                        </div>
+
                         <div class="pt-2 border-t border-slate-700/50">
                             <div class="flex justify-between items-center text-xs text-slate-400 mb-1">
                                 <span>AI Karar Skoru:</span>
@@ -368,10 +384,29 @@
                     </div>
 
                     <div class="space-y-3">
-                        <div class="relative">
+                        <div class="relative mb-2">
                             <input type="number" id="manualInput" oninput="calculatePreview()" placeholder="Tutar (USD)"
                                 class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-lg focus:border-blue-500 outline-none">
                             <span class="absolute right-3 top-3 text-slate-500 text-xs">USD</span>
+                        </div>
+                        <!-- Hızlı Tutar Butonları -->
+                        <div class="grid grid-cols-4 gap-2 mb-3">
+                            <button onclick="quickSetAmount(10)"
+                                class="bg-slate-800 hover:bg-slate-700 text-slate-400 py-1.5 rounded text-[10px] border border-slate-700 transition active:scale-95">$10</button>
+                            <button onclick="quickSetAmount(20)"
+                                class="bg-slate-800 hover:bg-slate-700 text-slate-400 py-1.5 rounded text-[10px] border border-slate-700 transition active:scale-95">$20</button>
+                            <button onclick="quickSetAmount(50)"
+                                class="bg-slate-800 hover:bg-slate-700 text-slate-400 py-1.5 rounded text-[10px] border border-slate-700 transition active:scale-95">$50</button>
+                            <button onclick="quickSetAmount(100)"
+                                class="bg-slate-800 hover:bg-slate-700 text-slate-400 py-1.5 rounded text-[10px] border border-slate-700 transition active:scale-95">$100</button>
+                            <button onclick="quickSetAmount(250)"
+                                class="bg-slate-800 hover:bg-slate-700 text-slate-400 py-1.5 rounded text-[10px] border border-slate-700 transition active:scale-95">$250</button>
+                            <button onclick="quickSetAmount(500)"
+                                class="bg-slate-800 hover:bg-slate-700 text-slate-400 py-1.5 rounded text-[10px] border border-slate-700 transition active:scale-95">$500</button>
+                            <button onclick="quickSetAmount(1000)"
+                                class="bg-slate-800 hover:bg-slate-700 text-slate-400 py-1.5 rounded text-[10px] border border-slate-700 transition active:scale-95">$1000</button>
+                            <button onclick="quickSetAmount('max')"
+                                class="bg-slate-800 hover:bg-slate-700 text-blue-400 font-bold py-1.5 rounded text-[10px] border border-slate-700 transition active:scale-95">MAX</button>
                         </div>
                         <div class="flex justify-between text-xs text-slate-400 px-1">
                             <span>Tahmini: <span id="manualBtcPreview" class="text-white">0.00</span> BTC</span>
@@ -868,7 +903,9 @@
             initial_balance: 1000.0,
             secured_profit: 0.0, // Güvenli Kasa
             pending_profit: 0.0,
-            invested_capital: 0.0, // YENİ: O anki işleme bağlanan net para
+            invested_capital: 0.0,
+            aktif_pozisyonlar: [], // YENİ: Alınan her lotun maliyet ve miktar takibi
+            oto_satis_hedefi: 0,   // YENİ: Kullanıcının belirlediği % kâr hedefi
 
             current_price: 0.0,
             try_rate: 36.50, // Varsayılan TRY Kuru (API'den güncellenecek)
@@ -1029,11 +1066,58 @@
                 // Kâr transferi sadece işlem kapandığında (sellAll içinde) yapılacak.
                 this.updateFloatingProfitStatus();
 
+                // YENİ: LOT BAZLI OTOMATİK SATIŞ KONTROLÜ
+                if (this.is_running && this.oto_satis_hedefi > 0 && this.aktif_pozisyonlar.length > 0) {
+                    this.checkLotProfitLevels();
+                }
+
                 if (this.is_running && !this.is_analyzing && rsi !== null) {
                     this.evaluateStrategy(rsi);
                 }
 
                 updateUI(rsi, isTrendUp);
+            },
+
+            // Her bir lotun kâr durumunu kontrol eder
+            checkLotProfitLevels: function () {
+                const results = [];
+                for (let i = this.aktif_pozisyonlar.length - 1; i >= 0; i--) {
+                    const lot = this.aktif_pozisyonlar[i];
+                    const profitPercent = ((this.current_price - lot.maliyet) / lot.maliyet) * 100;
+
+                    if (profitPercent >= this.oto_satis_hedefi) {
+                        this.log(`🎯 LOT HEDEFİNE ULAŞILDI: %${profitPercent.toFixed(2)} kâr ile satış yapılıyor.`, "success");
+                        this.sellSpecificLot(i, profitPercent);
+                    }
+                }
+            },
+
+            sellSpecificLot: function (index, profitPercent) {
+                const lot = this.aktif_pozisyonlar[index];
+                const grossUsd = lot.miktar * this.current_price;
+                const fee = grossUsd * this.config.commissionRate;
+                const netUsd = grossUsd - fee;
+                const profitUsd = netUsd - (lot.maliyet * lot.miktar);
+
+                this.budget += netUsd;
+                this.btc_amount -= lot.miktar;
+
+                // İşlem geçmişine ekle
+                this.addTransaction("SELL", this.current_price, grossUsd, fee, netUsd, lot.miktar, profitUsd);
+                this.log(`💰 OTO-SATIŞ: $${netUsd.toFixed(2)} (Kâr: %${profitPercent.toFixed(2)})`, "success");
+
+                audioSystem.playProfit();
+
+                // Pozisyonu diziden çıkar
+                this.aktif_pozisyonlar.splice(index, 1);
+
+                // Kasa Transferi (Opsiyonel: Eğer bakiye 1000$ üstündeyse)
+                if (this.budget > 1000) {
+                    const excess = this.budget - 1000;
+                    this.secured_profit += excess;
+                    this.budget = 1000;
+                    this.log(`🔒 KASA: $${excess.toFixed(2)} kâr kasaya aktarıldı.`, "success");
+                }
             },
 
             // Sadece UI güncellemesi için bekleyen kârı hesaplar (İşlem yapmaz)
@@ -1104,9 +1188,13 @@
                 this.log(`Mod güncellendi: Sabit $10 Kâr Stratejisi Aktif.`, "info");
             },
             updateConfig: function () {
-                // Konfigürasyon sabitlendiği için burası artık manuel değişiklikleri geçersiz kılabilir
-                // Ancak RSI input'unu hala dinleyelim
                 this.config.rsiBuyThreshold = parseFloat(document.getElementById('rsiBuyInput').value) || 30;
+                // Yeni oto-satış hedefini kaydet
+                const target = parseFloat(document.getElementById('otoSatisInput').value) || 0;
+                this.oto_satis_hedefi = target;
+                if (target > 0) {
+                    this.log(`⚙️ Oto-Satış Hedefi %${target} olarak güncellendi.`, "info");
+                }
             },
             calculateRSI: function () {
                 if (this.history.length < 15) return 50;
@@ -1188,7 +1276,14 @@
 
                 this.budget -= usdAmount;
                 this.btc_amount += btc;
-                this.first_trade_done = true; // İlk işlem artık yapıldı
+                this.first_trade_done = true;
+
+                // YENİ: Lot Takibi
+                this.aktif_pozisyonlar.push({
+                    maliyet: this.current_price,
+                    miktar: btc,
+                    zaman: Date.now()
+                });
 
                 this.peak_price = this.current_price;
                 this.addTransaction("BUY", this.current_price, usdAmount, fee, netAmount, btc);
@@ -1279,6 +1374,17 @@
         };
 
         // ... (Kalan kodlar aynı)
+        // Hızlı Tutar Seçimi
+        function quickSetAmount(val) {
+            const input = document.getElementById('manualInput');
+            if (val === 'max') {
+                input.value = realBot.budget.toFixed(2);
+            } else {
+                input.value = val;
+            }
+            calculatePreview();
+        }
+
         function calculatePreview() {
             const usd = parseFloat(document.getElementById('manualInput').value);
             if (usd > 0 && realBot.current_price > 0) {
