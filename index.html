@@ -268,7 +268,8 @@
                 onclick="fillManualInputWithBalance()" title="Tıklayarak bakiyeyi manuel işleme aktar">
                 <div
                     class="absolute right-2 top-2 text-orange-500/10 text-4xl group-hover:text-orange-500/20 transition">
-                    <i class="fa-brands fa-bitcoin"></i></div>
+                    <i class="fa-brands fa-bitcoin"></i>
+                </div>
                 <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Bitcoin (BTC)</p>
                 <h2 id="btcDisplay" class="text-2xl font-bold text-orange-400 font-mono">0.00000000</h2>
                 <p id="btcValueDisplay" class="text-xs text-slate-400 font-mono mt-1">≈ $0.00</p>
@@ -888,12 +889,12 @@
             logs: [],
 
             config: {
-                riskLevel: 'med', // Artık strateji sabit olduğu için bu sadece UI için
+                riskLevel: 'med',
                 minProfitUsd: 10.0, // HEDEF: İşlem başına en az 10$ Net Kâr
                 commissionRate: 0.001, // Binance Spot Komisyonu (%0.1)
                 trailingStopPercent: 1.5,
                 rsiBuyThreshold: 30,
-                tradeAmountPercent: 25 // needed for UI display logic although logic changed
+                tradeAmountPercent: 100
             },
 
             // ... (processNews fonksiyonu aynı kalıyor) ...
@@ -1098,27 +1099,25 @@
                         this.sellAll(`HEDEF ULAŞILDI (+$${netProfit.toFixed(2)})`);
                         this.lastAutoTrade = now;
                     }
-                    // Değilse, BEKLE (Patient Holding). Stop-loss yok.
+                    // Eğer kâr 10$ altındaysa kesinlikle satma (Patient Holding)
                     return;
                 }
 
-                // 2. ALIM MANTIĞI: SADECE SERMAYE HAZIRSA
-                // Bütçemiz 1000$ civarındaysa (önceki işlemden kalan küsuratlar olabilir, 999 kabul edilebilir)
-                if (this.budget >= 999) {
-                    // AI Giriş Kararı: RSI Düşük (Aşırı Satım) ve uygun piyasa
-                    // Risk almadan, düşükten almak için RSI < 30 (veya kullanıcı ayarı) bekler.
+                // 2. ALIM MANTIĞI: SADECE SERMAYE HAZIRSA (1000 USD)
+                if (this.budget >= 1000) {
+                    // AI Giriş Kararı: RSI Düşük olduğunda tüm sermaye ile gir
                     if (rsi < this.config.rsiBuyThreshold) {
-                        // TÜM BAKİYEYİ KULLAN (1000 USD Strategy)
-                        this.buy(this.budget, 1000, `AI Giriş Sinyali (RSI ${rsi.toFixed(1)})`); // Miktarı 1000 olarak sabitledim
+                        this.buy(1000, 1000, `AI Giriş Sinyali (RSI ${rsi.toFixed(1)})`);
                         this.lastAutoTrade = now;
                     }
                 }
             },
 
             buy: function (usdAmount, fixedCapital, reason) {
-                // "1000 USD Strategy" için bakiye kontrolü
-                // Eğer bakiye 1000'e çok yakınsa hepsini kullan
-                if (Math.abs(this.budget - 1000) < 5) usdAmount = this.budget;
+                // Her zaman tam olarak 1000 USD (veya bakiye yetersizse tüm bütçe)
+                if (this.budget >= 1000) usdAmount = 1000;
+                else usdAmount = this.budget;
+
                 if (usdAmount < 10) return;
 
                 const fee = usdAmount * this.config.commissionRate;
