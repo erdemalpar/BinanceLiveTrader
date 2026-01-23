@@ -298,83 +298,7 @@
             <!-- Left Column: Controls (4 Cols) -->
             <div class="lg:col-span-4 space-y-4 lg:sticky lg:top-24 h-fit">
 
-                <!-- AI Strategy Control -->
-                <div class="glass-panel p-5">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-microchip text-indigo-400"></i> AI Stratejisi
-                        </h3>
-                        <span id="riskBadge"
-                            class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-1 rounded border border-indigo-500/30">DENGELİ
-                            MOD</span>
-                    </div>
 
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-xs text-slate-400 mb-2 block">Risk & Sermaye Profili</label>
-                            <div class="grid grid-cols-3 gap-2">
-                                <button onclick="realBot.setRisk('low')" id="riskLow"
-                                    class="py-2 text-xs font-bold rounded bg-slate-800 text-slate-400 border border-slate-700 hover:border-green-500 transition">MUHAFAZAKAR<br><span
-                                        class="text-[9px] opacity-70">%5 Sermaye</span></button>
-                                <button onclick="realBot.setRisk('med')" id="riskMed"
-                                    class="py-2 text-xs font-bold rounded bg-blue-600/20 border border-blue-500 text-blue-400 transition">DENGELİ<br><span
-                                        class="text-[9px] opacity-70">%25 Sermaye</span></button>
-                                <button onclick="realBot.setRisk('high')" id="riskHigh"
-                                    class="py-2 text-xs font-bold rounded bg-slate-800 text-slate-400 border border-slate-700 hover:border-red-500 transition">AGRESİF<br><span
-                                        class="text-[9px] opacity-70">%50 Sermaye</span></button>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-xs text-slate-400 mb-1 block">İz Süren Stop (%)</label>
-                                <div class="relative">
-                                    <input type="number" id="trailingStopInput" value="1.5" step="0.1"
-                                        onchange="realBot.updateConfig()"
-                                        class="w-full bg-slate-900/50 border border-slate-700 rounded p-2 text-right text-sm text-white focus:border-blue-500 outline-none">
-                                    <span class="absolute left-2 top-2 text-slate-500 text-xs">%</span>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="text-xs text-slate-400 mb-1 block">RSI Alım Eşiği</label>
-                                <div class="relative">
-                                    <input type="number" id="rsiBuyInput" value="30" step="1"
-                                        onchange="realBot.updateConfig()"
-                                        class="w-full bg-slate-900/50 border border-slate-700 rounded p-2 text-right text-sm text-green-400 focus:border-green-500 outline-none">
-                                    <span class="absolute left-2 top-2 text-slate-500 text-xs"><i
-                                            class="fa-solid fa-arrow-down"></i></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- YENİ: Oto-Satış Kâr Hedefi -->
-                        <div class="pt-2">
-                            <label
-                                class="text-xs text-slate-400 mb-1 block uppercase font-bold tracking-wider">Oto-Satış
-                                Kâr Hedefi (%)</label>
-                            <div class="flex gap-2">
-                                <div class="relative flex-1">
-                                    <input type="number" id="otoSatisInput" value="0" step="0.1"
-                                        class="w-full bg-slate-900/50 border border-slate-700 rounded p-2 text-right text-sm text-blue-400 focus:border-blue-500 outline-none">
-                                    <span class="absolute left-2 top-2 text-slate-500 text-xs">%</span>
-                                </div>
-                                <button onclick="realBot.updateConfig()"
-                                    class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded text-xs font-bold transition whitespace-nowrap active:scale-95">KAYDET</button>
-                            </div>
-                        </div>
-
-                        <div class="pt-2 border-t border-slate-700/50">
-                            <div class="flex justify-between items-center text-xs text-slate-400 mb-1">
-                                <span>AI Karar Skoru:</span>
-                                <span id="aiScore" class="font-bold text-slate-200">Veri Toplanıyor</span>
-                            </div>
-                            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                                <div id="aiScoreBar" class="h-full bg-slate-500 w-1/2 transition-all duration-500">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Manual Override -->
                 <div class="glass-panel p-5">
@@ -969,16 +893,12 @@
 
             // ... (processNews fonksiyonu aynı kalıyor) ...
             processNews: function (score) {
-                const aiBadge = document.getElementById('aiScore');
-                const aiBar = document.getElementById('aiScoreBar');
-
                 let sentiment = "NÖTR";
                 let colorClass = "text-slate-200";
 
                 if (score >= 2) {
                     sentiment = "POZİTİF (BOĞA)";
                     colorClass = "text-green-400 neon-text";
-                    aiBar.style.width = "90%"; aiBar.className = "h-full bg-green-500 transition-all duration-500";
                     this.log(`🔥 HABER ETKİSİ: Güçlü olumlu hava (${score}).`, "success");
                     // Haber etkisiyle de olsa sadece bakiye uygunsa alır
                     if (this.budget >= 999 && this.btc_amount === 0) {
@@ -987,15 +907,10 @@
                 } else if (score <= -2) {
                     sentiment = "NEGATİF (AYI)";
                     colorClass = "text-red-400 neon-red";
-                    aiBar.style.width = "10%"; aiBar.className = "h-full bg-red-500 transition-all duration-500";
                     this.log(`⚠️ HABER ETKİSİ: Olumsuz hava (${score}). Beklemeye devam.`, "warning");
                 } else {
-                    aiBar.style.width = "50%"; aiBar.className = "h-full bg-slate-500 transition-all duration-500";
                     this.log(`ℹ️ HABER ETKİSİ: Piyasa dengeli (${score}).`, "warning");
                 }
-
-                aiBadge.innerText = sentiment;
-                aiBadge.className = `font-bold ${colorClass}`;
             },
 
             // YENİ: 1 Aylık Geçmiş Veri Analizi
@@ -1232,32 +1147,7 @@
                     audioSystem.init();
                 }
             },
-            setRisk: function (level) {
-                // Bu stratejide risk profili sabit, ancak UI'yı bozmamak için butonları güncelliyoruz
-                ['riskLow', 'riskMed', 'riskHigh'].forEach(id => {
-                    const el = document.getElementById(id);
-                    el.classList.remove('bg-blue-600/20', 'border-blue-500', 'text-blue-400');
-                    el.classList.add('bg-slate-800', 'border-slate-700', 'text-slate-400');
-                });
-                const activeBtn = document.getElementById('risk' + level.charAt(0).toUpperCase() + level.slice(1));
-                activeBtn.classList.remove('bg-slate-800', 'border-slate-700', 'text-slate-400');
-                activeBtn.classList.add('bg-blue-600/20', 'border-blue-500', 'text-blue-400');
 
-                const badge = document.getElementById('riskBadge');
-                badge.innerText = "SABİT $10 HEDEFİ";
-                badge.className = "text-[10px] bg-green-500/20 text-green-300 px-2 py-1 rounded border border-green-500/30";
-
-                this.log(`Mod güncellendi: Sabit $10 Kâr Stratejisi Aktif.`, "info");
-            },
-            updateConfig: function () {
-                this.config.rsiBuyThreshold = parseFloat(document.getElementById('rsiBuyInput').value) || 30;
-                // Yeni oto-satış hedefini kaydet
-                const target = parseFloat(document.getElementById('otoSatisInput').value) || 0;
-                this.oto_satis_hedefi = target;
-                if (target > 0) {
-                    this.log(`⚙️ Oto-Satış Hedefi %${target} olarak güncellendi.`, "info");
-                }
-            },
             calculateRSI: function () {
                 if (this.history.length < 15) return 50;
                 let gains = 0; let losses = 0;
@@ -1671,28 +1561,7 @@
             const budgetPercent = (realBot.budget / totalVal) * 100;
             document.getElementById('budgetBar').style.width = `${budgetPercent}%`;
 
-            // AI Bar
-            const aiBar = document.getElementById('aiScoreBar');
-            const aiText = document.getElementById('aiScore');
 
-            if (!aiText.innerText.includes("HABER")) {
-                const confidence = realBot.ai_confidence;
-                aiBar.style.width = `${confidence}%`;
-
-                if (confidence >= 70) {
-                    aiBar.className = "h-full bg-green-500 transition-all duration-500 shadow-[0_0_10px_#22c55e]";
-                    aiText.innerText = `GÜÇLÜ SİNYAL (%${confidence})`;
-                    aiText.className = "font-bold text-green-400 neon-text";
-                } else if (confidence >= 40) {
-                    aiBar.className = "h-full bg-yellow-500 transition-all duration-500";
-                    aiText.innerText = `POTANSİYEL (%${confidence})`;
-                    aiText.className = "font-bold text-yellow-400";
-                } else {
-                    aiBar.className = "h-full bg-slate-500 transition-all duration-500";
-                    aiText.innerText = realBot.btc_amount > 0 ? "POZİSYON KORUNUYOR" : "SİNYAL BEKLENİYOR";
-                    aiText.className = "font-bold text-slate-400";
-                }
-            }
 
             // Pie & Equity Update
             assetPieChart.data.datasets[0].data = [realBot.budget, realBot.btc_amount * realBot.current_price];
