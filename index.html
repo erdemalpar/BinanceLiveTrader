@@ -122,15 +122,15 @@
 
     <!-- Top Bar -->
     <header
-        class="sticky top-0 z-50 flex flex-col md:flex-row justify-between items-center gap-4 bg-[#0b1120]/95 backdrop-blur shadow-lg px-4 md:px-6 py-4 border-b border-white/5">
+        class="sticky top-0 z-50 flex flex-col md:flex-row justify-between items-center gap-2 bg-[#0b1120]/95 backdrop-blur shadow-lg px-4 md:px-6 py-2 border-b border-white/5">
         <div class="flex items-center gap-3">
             <div
-                class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                class="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
                 <i class="fa-brands fa-bitcoin"></i>
             </div>
             <div>
                 <h1
-                    class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400 tracking-tight">
+                    class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400 tracking-tight">
                     BINANCE <span class="text-white">LIVE TRADER</span>
                 </h1>
                 <div class="flex items-center gap-2 text-xs text-slate-400">
@@ -144,7 +144,7 @@
 
         <div class="flex gap-2 items-stretch">
             <!-- Dünya Saatleri Paneli (YENİ) -->
-            <div class="glass-panel px-3 py-1 flex flex-col justify-center min-w-[100px] gap-0.5">
+            <div class="glass-panel px-3 py-1 flex flex-col justify-center min-w-[80px] gap-0.5">
                 <div class="flex justify-between items-center text-[9px] text-slate-400 font-mono">
                     <span class="flex items-center gap-1" title="New York"><span
                             class="grayscale opacity-70 text-[10px]">🇺🇸</span> NY</span>
@@ -163,44 +163,44 @@
                 </div>
             </div>
 
-            <div class="glass-panel px-4 py-2 flex flex-col items-center justify-center min-w-[100px]">
-                <span class="text-[10px] uppercase text-slate-500 tracking-wider">Piyasa Trendi</span>
-                <span id="trendIndicator" class="font-bold text-slate-400">BEKLENİYOR...</span>
+            <div class="glass-panel px-3 py-1 flex flex-col items-center justify-center min-w-[80px]">
+                <span class="text-[9px] uppercase text-slate-500 tracking-wider">Piyasa Trendi</span>
+                <span id="trendIndicator" class="text-xs font-bold text-slate-400">BEKLENİYOR...</span>
             </div>
-            <div class="glass-panel px-4 py-2 flex flex-col items-center justify-center min-w-[100px]">
-                <span class="text-[10px] uppercase text-slate-500 tracking-wider">RSI (14)</span>
-                <span id="rsiIndicator" class="font-bold text-blue-400 font-mono">--.-</span>
+            <div class="glass-panel px-3 py-1 flex flex-col items-center justify-center min-w-[80px]">
+                <span class="text-[9px] uppercase text-slate-500 tracking-wider">RSI (14)</span>
+                <span id="rsiIndicator" class="text-xs font-bold text-blue-400 font-mono">--.-</span>
             </div>
         </div>
 
-        <div class="flex gap-2 items-center">
+        <div class="flex gap-1.5 items-center">
             <!-- Haberler Butonu -->
             <button onclick="toggleNewsModal()"
-                class="w-10 h-10 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-blue-400 rounded-lg transition border border-slate-700 relative group"
+                class="w-9 h-9 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-blue-400 rounded-lg transition border border-slate-700 relative group"
                 title="Piyasa Haberleri & AI Analizi">
-                <i class="fa-solid fa-newspaper"></i>
+                <i class="fa-solid fa-newspaper text-sm"></i>
                 <span id="newsBadge"
-                    class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping hidden"></span>
+                    class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-ping hidden"></span>
                 <span id="newsBadgeStatic"
-                    class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full hidden"></span>
+                    class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full hidden"></span>
             </button>
 
             <!-- Ses Aç/Kapa Butonu -->
             <button onclick="realBot.toggleSound()" id="soundToggleBtn"
-                class="w-10 h-10 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-green-400 rounded-lg transition border border-slate-700"
+                class="w-9 h-9 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-green-400 rounded-lg transition border border-slate-700"
                 title="Sesi Aç/Kapat">
-                <i class="fa-solid fa-volume-high"></i>
+                <i class="fa-solid fa-volume-high text-sm"></i>
             </button>
 
             <button onclick="realBot.toggle()" id="mainToggleBtn"
-                class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition btn-glow font-bold flex items-center gap-2">
+                class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition btn-glow text-xs font-bold flex items-center gap-2">
                 <i class="fa-solid fa-power-off"></i> <span id="btnText">BAŞLAT</span>
             </button>
 
             <button onclick="realBot.reset()"
-                class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-lg transition border border-slate-700"
+                class="w-9 h-9 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-lg transition border border-slate-700"
                 title="Sıfırla">
-                <i class="fa-solid fa-rotate"></i>
+                <i class="fa-solid fa-rotate text-sm"></i>
             </button>
         </div>
     </header>
@@ -213,19 +213,19 @@
 
             <!-- Safe Wallet (GÜNCELLENDİ: AI Otomatik) -->
             <div id="safeWalletCard"
-                class="glass-panel p-5 relative overflow-hidden border-green-500/30 bg-green-500/5 transition duration-500">
-                <div class="absolute right-2 top-2 text-green-500/20 text-4xl"><i class="fa-solid fa-vault"></i></div>
-                <p class="text-green-400 text-xs font-bold uppercase tracking-wider mb-1 flex items-center gap-1">
+                class="glass-panel p-4 relative overflow-hidden border-green-500/30 bg-green-500/5 transition duration-500">
+                <div class="absolute right-2 top-2 text-green-500/20 text-2xl"><i class="fa-solid fa-vault"></i></div>
+                <p class="text-green-400 text-[10px] font-bold uppercase tracking-wider mb-1 flex items-center gap-1">
                     <i class="fa-solid fa-lock text-[10px]"></i> Güvenli Kasa
                 </p>
-                <h2 id="securedProfitDisplay" class="text-3xl font-bold text-white tracking-tight mb-0.5">$0.00</h2>
+                <h2 id="securedProfitDisplay" class="text-xl font-bold text-white tracking-tight mb-0.5">$0.00</h2>
                 <!-- YENİ: TL Karşılığı Göstergesi -->
-                <p id="securedProfitTryDisplay" class="text-xs text-slate-400 font-mono mb-2 opacity-80">≈ ₺0.00</p>
+                <p id="securedProfitTryDisplay" class="text-[10px] text-slate-400 font-mono mb-2 opacity-80">≈ ₺0.00</p>
 
                 <div class="flex justify-between items-end mt-2">
-                    <span class="text-xs text-slate-500">Çekilen Kâr</span>
+                    <span class="text-[10px] text-slate-500">Çekilen Kâr</span>
                     <span
-                        class="text-[10px] text-green-400/70 bg-green-900/30 px-1.5 py-0.5 rounded border border-green-500/20">AUTO-TRANSFER</span>
+                        class="text-[9px] text-green-400/70 bg-green-900/30 px-1 py-0.5 rounded border border-green-500/20">AUTO-TRANSFER</span>
                 </div>
 
                 <!-- Bekleyen Kâr ve AI Bildirimi -->
@@ -242,51 +242,52 @@
             </div>
 
             <!-- Total Assets -->
-            <div class="glass-panel p-5 relative overflow-hidden group">
+            <div class="glass-panel p-4 relative overflow-hidden group">
                 <div
-                    class="absolute -right-6 -top-6 w-24 h-24 bg-yellow-500/10 rounded-full blur-xl group-hover:bg-yellow-500/20 transition">
+                    class="absolute -right-6 -top-6 w-16 h-16 bg-yellow-500/10 rounded-full blur-xl group-hover:bg-yellow-500/20 transition">
                 </div>
-                <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Aktif Varlık (Trade)</p>
-                <h2 id="portfolioDisplay" class="text-2xl font-bold text-white tracking-tight">$1,000.00</h2>
-                <div class="flex justify-between items-end mt-2">
-                    <span class="text-xs text-slate-500">PNL (Net)</span>
-                    <span id="pnlDisplay" class="text-sm font-bold text-green-400">+0.00%</span>
+                <p class="text-slate-400 text-[10px] font-semibold uppercase tracking-wider mb-1">Aktif Varlık (Trade)
+                </p>
+                <h2 id="portfolioDisplay" class="text-xl font-bold text-white tracking-tight">$1,000.00</h2>
+                <div class="flex justify-between items-end mt-1">
+                    <span class="text-[10px] text-slate-500">PNL</span>
+                    <span id="pnlDisplay" class="text-xs font-bold text-green-400">+0.00%</span>
                 </div>
             </div>
 
             <!-- Cash Wallet -->
-            <div class="glass-panel p-5 relative overflow-hidden">
-                <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Nakit Bakiye (USDT)</p>
-                <h2 id="budgetDisplay" class="text-2xl font-bold text-green-400 font-mono">$1,000.00</h2>
-                <div class="w-full bg-slate-700/50 h-1.5 mt-3 rounded-full overflow-hidden">
+            <div class="glass-panel p-4 relative overflow-hidden">
+                <p class="text-slate-400 text-[10px] font-semibold uppercase tracking-wider mb-1">Nakit Bakiye (USDT)
+                </p>
+                <h2 id="budgetDisplay" class="text-xl font-bold text-green-400 font-mono">$1,000.00</h2>
+                <div class="w-full bg-slate-700/50 h-1 mt-2 rounded-full overflow-hidden">
                     <div id="budgetBar" class="h-full bg-green-500 w-full transition-all duration-500"></div>
                 </div>
             </div>
 
             <!-- Holding -->
-            <div class="glass-panel p-5 relative overflow-hidden cursor-pointer hover:bg-slate-800/50 transition group"
+            <div class="glass-panel p-4 relative overflow-hidden cursor-pointer hover:bg-slate-800/50 transition group"
                 onclick="fillManualInputWithBalance()" title="Tıklayarak bakiyeyi manuel işleme aktar">
                 <div
-                    class="absolute right-2 top-2 text-orange-500/10 text-4xl group-hover:text-orange-500/20 transition">
+                    class="absolute right-2 top-2 text-orange-500/10 text-2xl group-hover:text-orange-500/20 transition">
                     <i class="fa-brands fa-bitcoin"></i>
                 </div>
-                <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Bitcoin (BTC)</p>
-                <h2 id="btcDisplay" class="text-2xl font-bold text-orange-400 font-mono">0.00000000</h2>
-                <p id="btcValueDisplay" class="text-xs text-slate-400 font-mono mt-1">≈ $0.00</p>
-                <div class="text-xs text-slate-500 mt-2 flex justify-between border-t border-slate-700/50 pt-2">
-                    <span>Ort. Maliyet:</span>
-                    <span id="avgCostDisplay" class="text-slate-300">$0.00</span>
+                <p class="text-slate-400 text-[10px] font-semibold uppercase tracking-wider mb-1">Bitcoin (BTC)</p>
+                <h2 id="btcDisplay" class="text-xl font-bold text-orange-400 font-mono">0.00000000</h2>
+                <p id="btcValueDisplay" class="text-[10px] text-slate-400 font-mono mt-0.5">≈ $0.00</p>
+                <div class="text-[10px] text-slate-500 mt-1 flex justify-between border-t border-slate-700/50 pt-1">
+                    <span>Maliyet:</span>
+                    <span id="avgCostDisplay" class="text-slate-300 font-bold">$0.00</span>
                 </div>
             </div>
 
             <!-- Live Price -->
-            <div class="glass-panel p-5 border-l-2 border-yellow-500 bg-gradient-to-r from-yellow-500/5 to-transparent">
-                <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">BTC / USD</p>
-                <!-- ETİKET GÜNCELLENDİ -->
-                <h2 id="priceDisplay" class="text-2xl font-bold text-white">Yükleniyor...</h2>
-                <div class="text-xs mt-2 flex items-center gap-1">
-                    <i class="fa-solid fa-bolt text-yellow-500"></i>
-                    <span class="text-slate-400">Canlı</span>
+            <div class="glass-panel p-4 border-l-2 border-yellow-500 bg-gradient-to-r from-yellow-500/5 to-transparent">
+                <p class="text-slate-400 text-[10px] font-semibold uppercase tracking-wider mb-1">BTC / USD</p>
+                <h2 id="priceDisplay" class="text-xl font-bold text-white tracking-tighter">Yükleniyor...</h2>
+                <div class="text-[10px] mt-1 flex items-center gap-1">
+                    <i class="fa-solid fa-bolt text-yellow-500 animate-pulse"></i>
+                    <span class="text-slate-500">CANLI</span>
                 </div>
             </div>
         </div>
@@ -495,6 +496,37 @@
                     <div
                         class="relative flex-1 w-full overflow-hidden rounded-lg bg-gradient-to-b from-slate-900/50 to-slate-900/10 border border-slate-800">
                         <canvas id="priceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- YENİ: Aktif Pozisyonlar (Lot Takibi) -->
+                <div
+                    class="glass-panel p-5 flex flex-col max-h-[300px] border-l-4 border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.1)]">
+                    <div class="flex justify-between items-center mb-4 flex-none">
+                        <h3 class="font-bold text-white text-sm uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-blue-400"></i> Aktif Pozisyonlar (Lot Takibi)
+                        </h3>
+                        <span class="text-[10px] text-slate-500 bg-slate-800 px-2 py-0.5 rounded">Canlı Takip</span>
+                    </div>
+                    <div class="overflow-x-auto overflow-y-auto flex-1 custom-scrollbar relative">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <thead class="sticky top-0 bg-slate-900 z-10">
+                                <tr class="text-slate-500 border-b border-slate-700/50">
+                                    <th class="pb-3 pl-2 font-medium">Lot ID</th>
+                                    <th class="pb-3 font-medium">Maliyet</th>
+                                    <th class="pb-3 font-medium">Miktar (BTC)</th>
+                                    <th class="pb-3 font-medium font-bold text-blue-400">OtoSat (%)</th>
+                                    <th class="pb-3 font-medium">Kâr/Zarar (%)</th>
+                                    <th class="pb-3 pr-2 font-medium text-right">İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lotTableBody" class="text-slate-300">
+                                <tr>
+                                    <td colspan="5" class="text-center py-6 text-slate-600 italic">Aktif pozisyon
+                                        bulunmuyor.</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -813,7 +845,6 @@
                     priceChart.data.datasets[3].data = sells;
 
                     priceChart.update();
-                    realBot.log("Grafik CANLI moda alındı.", "info");
                     return;
                 }
                 await this.fetchHistory(period);
@@ -885,11 +916,9 @@
                     // ------------------------------------------------
 
                     priceChart.update();
-                    realBot.log(`${period} geçmiş verisi yüklendi ve işlemler işlendi.`, "success");
 
                 } catch (e) {
-                    realBot.log("Geçmiş veri çekilemedi.", "error");
-                    console.error(e);
+                    console.error("Geçmiş veri çekilemedi:", e);
                 }
             }
         };
@@ -1080,16 +1109,49 @@
 
             // Her bir lotun kâr durumunu kontrol eder
             checkLotProfitLevels: function () {
-                const results = [];
                 for (let i = this.aktif_pozisyonlar.length - 1; i >= 0; i--) {
                     const lot = this.aktif_pozisyonlar[i];
                     const profitPercent = ((this.current_price - lot.maliyet) / lot.maliyet) * 100;
 
-                    if (profitPercent >= this.oto_satis_hedefi) {
-                        this.log(`🎯 LOT HEDEFİNE ULAŞILDI: %${profitPercent.toFixed(2)} kâr ile satış yapılıyor.`, "success");
-                        this.sellSpecificLot(i, profitPercent);
+                    // ÖNCELİK 1: Satır bazlı kilitli hedef (OtoSat)
+                    if (lot.is_locked && lot.oto_sat_hedefi > 0) {
+                        if (profitPercent >= lot.oto_sat_hedefi) {
+                            this.log(`🎯 ÖZEL LOT HEDEFİ: %${profitPercent.toFixed(2)} kâr ile satış yapılıyor.`, "success");
+                            this.sellSpecificLot(i, profitPercent);
+                            continue;
+                        }
+                    }
+
+                    // ÖNCELİK 2: Genel hedef (Paneldeki) - Eğer lot kilitli değilse
+                    if (!lot.is_locked && this.oto_satis_hedefi > 0) {
+                        if (profitPercent >= this.oto_satis_hedefi) {
+                            this.log(`🎯 GENEL LOT HEDEFİ: %${profitPercent.toFixed(2)} kâr ile satış yapılıyor.`, "success");
+                            this.sellSpecificLot(i, profitPercent);
+                        }
                     }
                 }
+            },
+
+            // Satır bazlı ayarları kaydet
+            saveLotConfig: function (index, targetValue) {
+                const lot = this.aktif_pozisyonlar[index];
+                if (!lot) return;
+
+                // Virgülü noktaya çevirerek güvenli parse işlemi yap
+                const cleanValue = String(targetValue).replace(',', '.');
+                const target = parseFloat(cleanValue);
+
+                if (isNaN(target) || target <= 0) {
+                    this.log("⚠️ Geçersiz kâr hedefi. Lütfen pozitif bir sayı girin.", "warning");
+                    return;
+                }
+
+                lot.oto_sat_hedefi = target;
+                lot.is_locked = true;
+                this.log(`📌 Lot #${index + 1} için %${target} kâr hedefi kilitlendi.`, "info");
+
+                // UI'ı hemen güncelle
+                updateUI(this.calculateRSI(), this.history[this.history.length - 1] > this.history[this.history.length - 5]);
             },
 
             sellSpecificLot: function (index, profitPercent) {
@@ -1282,7 +1344,9 @@
                 this.aktif_pozisyonlar.push({
                     maliyet: this.current_price,
                     miktar: btc,
-                    zaman: Date.now()
+                    zaman: Date.now(),
+                    oto_sat_hedefi: 0, // Her lot için özel hedef
+                    is_locked: false   // Hedef kilitli mi?
                 });
 
                 this.peak_price = this.current_price;
@@ -1720,12 +1784,80 @@
                     </tr>
                 `).join('');
             }
+
+            // YENİ: Akıllı Lotlar Tablosu Güncellemesi (Odak Kaybını Önler)
+            const lotTableBody = document.getElementById('lotTableBody');
+
+            if (realBot.aktif_pozisyonlar.length === 0) {
+                lotTableBody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-600 italic">Aktif pozisyon bulunmuyor.</td></tr>';
+                return;
+            }
+
+            // Tablo yapısı henüz kurulmamışsa veya lot sayısı değişmişse tam çizim yap
+            const currentRows = lotTableBody.querySelectorAll('tr[data-lot-id]').length;
+            if (currentRows !== realBot.aktif_pozisyonlar.length) {
+                lotTableBody.innerHTML = realBot.aktif_pozisyonlar.map((lot, index) => {
+                    const profitPercent = ((realBot.current_price - lot.maliyet) / lot.maliyet) * 100;
+                    const pColor = profitPercent >= 0 ? "text-green-400 neon-text" : "text-red-400 neon-red";
+                    const pSign = profitPercent >= 0 ? "+" : "";
+
+                    const isLocked = lot.is_locked;
+                    const saveBtnContent = isLocked ? '<i class="fa-solid fa-check text-green-400"></i>' : 'KAYDET';
+                    const saveBtnClass = isLocked ? 'bg-green-500/10 border-green-500/30 cursor-default px-3' : 'bg-blue-600 hover:bg-blue-500 text-white px-2 active:scale-95';
+
+                    return `
+                    <tr data-lot-id="${index}" class="border-b border-slate-800/50 hover:bg-slate-800/40 transition group">
+                        <td class="py-3 pl-2 font-mono text-xs text-slate-500">#${index + 1}</td>
+                        <td class="py-3 text-slate-300">$${lot.maliyet.toLocaleString()}</td>
+                        <td class="py-3 text-slate-400 font-mono text-xs">${lot.miktar.toFixed(8)}</td>
+                        <td class="py-3">
+                            <div class="flex items-center gap-1">
+                                <input type="number" step="0.1" min="0.1" value="${lot.oto_sat_hedefi || ''}" 
+                                    id="lotTarget_${index}"
+                                    ${isLocked ? 'disabled' : ''}
+                                    class="w-14 bg-slate-900 border border-slate-700 rounded px-1 py-0.5 text-right text-xs text-blue-400 focus:border-blue-500 outline-none ${isLocked ? 'opacity-50' : ''}"
+                                    placeholder="%">
+                                <button onclick="${isLocked ? '' : `realBot.saveLotConfig(${index}, document.getElementById('lotTarget_${index}').value)`}" 
+                                    class="${saveBtnClass} py-1 rounded text-[10px] border transition shadow-sm font-bold">
+                                    ${saveBtnContent}
+                                </button>
+                            </div>
+                        </td>
+                        <td class="py-3 font-bold ${pColor} animate-pulse-slow" id="lotProfitVal_${index}">
+                            ${pSign}${profitPercent.toFixed(2)}%
+                        </td>
+                        <td class="py-3 pr-2 text-right">
+                            <button onclick="realBot.sellSpecificLot(${index}, ${profitPercent.toFixed(2)})" 
+                                class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-2 py-1 rounded text-[10px] border border-red-500/30 transition shadow-sm">
+                                KAPAT
+                            </button>
+                        </td>
+                    </tr>
+                    `;
+                }).join('');
+            } else {
+                // Sadece kâr rakamlarını güncelle (Inputlara dokunma)
+                realBot.aktif_pozisyonlar.forEach((lot, index) => {
+                    const profitPercent = ((realBot.current_price - lot.maliyet) / lot.maliyet) * 100;
+                    const pColor = profitPercent >= 0 ? "text-green-400 neon-text" : "text-red-400 neon-red";
+                    const pSign = profitPercent >= 0 ? "+" : "";
+
+                    const profitCell = document.getElementById(`lotProfitVal_${index}`);
+                    if (profitCell) {
+                        profitCell.innerText = `${pSign}${profitPercent.toFixed(2)}%`;
+                        profitCell.className = `py-3 font-bold ${pColor} animate-pulse-slow`;
+                    }
+                });
+            }
         }
 
         // --- INIT ---
         realBot.log("Sistem Başlatılıyor...", "system");
         realBot.log("Binance API Bağlantısı Kuruluyor...", "warning");
         setInterval(() => { realBot.tick(); }, 1000);
+
+        // Sayfa açılışında 15DK timeframe'i başlat
+        chartManager.setPeriod('15DK');
 
     </script>
 </body>
