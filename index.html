@@ -1150,8 +1150,8 @@
                 lot.is_locked = true;
                 this.log(`📌 Lot #${index + 1} için %${target} kâr hedefi kilitlendi.`, "info");
 
-                // UI'ı hemen güncelle
-                updateUI(this.calculateRSI(), this.history[this.history.length - 1] > this.history[this.history.length - 5]);
+                // UI'ı hemen GÜNCELLE (force = true ile tabloyu baştan çizdir)
+                updateUI(this.calculateRSI(), this.history[this.history.length - 1] > this.history[this.history.length - 5], true);
             },
 
             sellSpecificLot: function (index, profitPercent) {
@@ -1620,7 +1620,7 @@
         });
 
         // --- UI UPDATE LOOP ---
-        function updateUI(rsi, isTrendUp) {
+        function updateUI(rsi, isTrendUp, forceRefresh = false) {
             if (realBot.current_price === 0) return;
 
             // ... (Metin güncellemeleri)
@@ -1793,9 +1793,9 @@
                 return;
             }
 
-            // Tablo yapısı henüz kurulmamışsa veya lot sayısı değişmişse tam çizim yap
+            // Tablo yapısı henüz kurulmamışsa, lot sayısı değişmişse VEYA zorunlu yenileme istenmişse tam çizim yap
             const currentRows = lotTableBody.querySelectorAll('tr[data-lot-id]').length;
-            if (currentRows !== realBot.aktif_pozisyonlar.length) {
+            if (currentRows !== realBot.aktif_pozisyonlar.length || forceRefresh) {
                 lotTableBody.innerHTML = realBot.aktif_pozisyonlar.map((lot, index) => {
                     const profitPercent = ((realBot.current_price - lot.maliyet) / lot.maliyet) * 100;
                     const pColor = profitPercent >= 0 ? "text-green-400 neon-text" : "text-red-400 neon-red";
