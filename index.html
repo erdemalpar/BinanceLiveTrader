@@ -436,7 +436,12 @@
                         <table class="w-full text-left text-sm whitespace-nowrap">
                             <thead class="sticky top-0 bg-slate-900 z-10">
                                 <tr class="text-slate-500 border-b border-slate-700/50">
-                                    <th class="pb-3 pl-2 font-medium">Lot ID</th>
+                                    <th class="pb-3 pl-2 font-medium w-8">
+                                        <input type="checkbox" id="selectAllLots"
+                                            onclick="toggleSelectAllLots(this.checked)"
+                                            class="rounded border-slate-700 bg-slate-900">
+                                    </th>
+                                    <th class="pb-3 font-medium">Lot ID</th>
                                     <th class="pb-3 font-medium">Maliyet</th>
                                     <th class="pb-3 font-medium">Miktar (BTC)</th>
                                     <th class="pb-3 font-medium font-bold text-blue-400">OtoSat (%)</th>
@@ -850,6 +855,8 @@
 
         // --- REAL TRADING ENGINE (Binance API) ---
 
+        let selectedLots = []; // Kullanıcının seçtiği lotların indexleri
+
         const realBot = {
             budget: 1000.0,      // SABİT BAŞLANGIÇ SERMAYESİ
             btc_amount: 0.0,
@@ -1011,7 +1018,7 @@
                 this.updateFloatingProfitStatus();
 
                 // YENİ: LOT BAZLI OTOMATİK SATIŞ KONTROLÜ
-                if (this.is_running && this.oto_satis_hedefi > 0 && this.aktif_pozisyonlar.length > 0) {
+                if (this.is_running && this.aktif_pozisyonlar.length > 0) {
                     this.checkLotProfitLevels();
                 }
 
@@ -1069,32 +1076,39 @@
                 updateUI(this.calculateRSI(), this.history[this.history.length - 1] > this.history[this.history.length - 5], true);
             },
 
-            sellSpecificLot: function (index, profitPercent) {
+            sellSpecificLot: function (index, profitPercent, isManual = false) {
                 const lot = this.aktif_pozisyonlar[index];
+                if (!lot) return;
+
                 const grossUsd = lot.miktar * this.current_price;
                 const fee = grossUsd * this.config.commissionRate;
                 const netUsd = grossUsd - fee;
-                const profitUsd = netUsd - (lot.maliyet * lot.miktar);
+                const maliyetUsd = lot.maliyet * lot.miktar;
+                const profitUsd = netUsd - maliyetUsd;
 
-                this.budget += netUsd;
+                // Sermaye takibini güncelle (satılan lotun maliyetini çıkar)
+                this.invested_capital -= maliyetUsd;
+                if (this.invested_capital < 0) this.invested_capital = 0;
+
+                // Talebe göre: Ana meblağ nakit bakiyeye, kâr kısmı güvenli kasaya
+                this.budget += maliyetUsd;
+                this.secured_profit += profitUsd;
                 this.btc_amount -= lot.miktar;
 
                 // İşlem geçmişine ekle
                 this.addTransaction("SELL", this.current_price, grossUsd, fee, netUsd, lot.miktar, profitUsd);
-                this.log(`💰 OTO-SATIŞ: $${netUsd.toFixed(2)} (Kâr: %${profitPercent.toFixed(2)})`, "success");
+                this.log(`💰 ${isManual ? 'MANUEL' : 'OTOMATİK'} SATIŞ: $${netUsd.toFixed(2)} (Kâr: %${profitPercent.toFixed(2)} | Kasaya: +$${profitUsd.toFixed(2)})`, "success");
 
                 audioSystem.playProfit();
 
                 // Pozisyonu diziden çıkar
                 this.aktif_pozisyonlar.splice(index, 1);
 
-                // Kasa Transferi (Opsiyonel: Eğer bakiye 1000$ üstündeyse)
-                if (this.budget > 1000) {
-                    const excess = this.budget - 1000;
-                    this.secured_profit += excess;
-                    this.budget = 1000;
-                    this.log(`🔒 KASA: $${excess.toFixed(2)} kâr kasaya aktarıldı.`, "success");
-                }
+                // Seçili lot listesini temizle (indeksler değiştiği için listeyi boşaltmak en güvenlisi veya filtrelemek)
+                selectedLots = [];
+
+                // UI'ı hemen GÜNCELLE
+                updateUI(this.calculateRSI(), this.history[this.history.length - 1] > this.history[this.history.length - 5], true);
             },
 
             // Sadece UI güncellemesi için bekleyen kârı hesaplar (İşlem yapmaz)
@@ -1258,37 +1272,40 @@
                 const profit = netUsd - this.invested_capital;
                 const isProfit = profit > 0;
 
-                this.budget += netUsd;
+                // Talebe göre: Maliyet (invested_capital) bakiyeye, kâr kasaya
+                this.budget += this.invested_capital;
+                if (profit > 0) {
+                    this.secured_profit += profit;
+                } else {
+                    // Zarar varsa budget'tan düşer (netUsd zaten invested_capital'den küçük demektir)
+                    // Ancak biz zaten this.budget += invested_capital yaptık. 
+                    // Doğrusu: budget += netUsd (eğer zarar varsa)
+                    this.budget -= (this.invested_capital - netUsd); // Zararı sermayeden düş
+                }
+
                 this.addTransaction("SELL", this.current_price, grossUsd, fee, netUsd, this.btc_amount, profit);
 
                 const emoji = isProfit ? "🤑" : "🛑";
                 const type = isProfit ? "success" : "error";
-                this.log(`${emoji} SATIŞ: $${netUsd.toFixed(2)} (Net: +$${profit.toFixed(2)}) | ${reason}`, type);
+                this.log(`${emoji} TOPLU SATIŞ: $${netUsd.toFixed(2)} (Kâr: +$${profit.toFixed(2)}) | ${reason}`, type);
 
                 if (isProfit) audioSystem.playProfit(); else audioSystem.playLoss();
 
                 this.btc_amount = 0;
                 this.avg_buy_price = 0;
                 this.peak_price = 0;
-                this.invested_capital = 0; // Yatırım sıfırlandı
+                this.invested_capital = 0;
+                this.aktif_pozisyonlar = [];
+                selectedLots = [];
 
-                // --- KÂR YÖNETİMİ (PROFIT MANAGEMENT) ---
-                // Eğer satış sonrası bakiye 1000 USD'den fazlaysa, fazlasını kasaya at
-                if (this.budget > 1000) {
-                    const excess = this.budget - 1000;
-
-                    // Sadece 1000$ sermaye bırak, gerisini al
-                    this.secured_profit += excess;
-                    this.budget = 1000;
-
-                    this.log(`🔒 KASA TRANSFERİ: $${excess.toFixed(2)} güvenli kasaya aktarıldı.`, "success");
-                    this.log(`🔄 Sermaye $1000 olarak sıfırlandı.`, "system");
-
-                    // Kasa animasyonu
+                // Kasa animasyonu
+                if (isProfit) {
                     const card = document.getElementById('safeWalletCard');
                     card.classList.add('profit-animate');
                     setTimeout(() => card.classList.remove('profit-animate'), 1000);
                 }
+
+                updateUI(this.calculateRSI(), this.history[this.history.length - 1] > this.history[this.history.length - 5], true);
             },
 
             addTransaction: function (type, price, gross, fee, net, amount, pnl = 0) {
@@ -1358,14 +1375,77 @@
                 calculatePreview();
             } else { alert("Geçersiz bakiye veya miktar."); }
         }
-        function performManualSell() { realBot.sellAll("Kullanıcı Manuel Satışı"); }
+        function performManualSell() {
+            if (selectedLots.length > 0) {
+                // İndex kaymasını önlemek için tersten (büyükten küçüğe) satıyoruz
+                const sortedIndexes = [...selectedLots].sort((a, b) => b - a);
+                sortedIndexes.forEach(index => {
+                    const lot = realBot.aktif_pozisyonlar[index];
+                    if (lot) {
+                        const profitPercent = ((realBot.current_price - lot.maliyet) / lot.maliyet) * 100;
+                        realBot.sellSpecificLot(index, profitPercent, true);
+                    }
+                });
+                selectedLots = []; // İşlem bitince listeyi boşalt
+                realBot.log("Seçilen lotların manuel satışı tamamlandı.", "info");
+            } else {
+                // Seçilen lot yoksa tümünü satmayı teklif et veya varsayılan sellAll çağır
+                if (confirm("Seçili lot bulunmuyor. Tüm pozisyonlar satılsın mı?")) {
+                    realBot.sellAll("Kullanıcı Manuel Satışı (Tümü)");
+                }
+            }
+        }
 
-        // YENİ: Holding kartına tıklanınca bakiyeyi inputa doldur
+        // YENİ: Lot Seçim Yönetimi
+        function toggleLotSelection(index) {
+            const idx = selectedLots.indexOf(index);
+            if (idx > -1) {
+                selectedLots.splice(idx, 1);
+            } else {
+                selectedLots.push(index);
+            }
+            updateManualInputWithSelectedLots();
+            updateUI(realBot.calculateRSI(), realBot.history[realBot.history.length - 1] > realBot.history[realBot.history.length - 5], true);
+        }
+
+        function toggleSelectAllLots(checked) {
+            if (checked) {
+                selectedLots = realBot.aktif_pozisyonlar.map((_, i) => i);
+            } else {
+                selectedLots = [];
+            }
+            updateManualInputWithSelectedLots();
+            updateUI(realBot.calculateRSI(), realBot.history[realBot.history.length - 1] > realBot.history[realBot.history.length - 5], true);
+        }
+
+        function updateManualInputWithSelectedLots() {
+            if (selectedLots.length === 0) {
+                document.getElementById('manualInput').value = "";
+                calculatePreview();
+                return;
+            }
+
+            let totalUsdValue = 0;
+            selectedLots.forEach(index => {
+                const lot = realBot.aktif_pozisyonlar[index];
+                if (lot) {
+                    totalUsdValue += lot.miktar * realBot.current_price;
+                }
+            });
+
+            document.getElementById('manualInput').value = totalUsdValue.toFixed(2);
+            calculatePreview();
+        }
+
+        // Holding kartına tıklanınca bakiyeyi inputa doldur
         function fillManualInputWithBalance() {
             if (realBot.btc_amount > 0 && realBot.current_price > 0) {
                 const totalValue = realBot.btc_amount * realBot.current_price;
                 const inputEl = document.getElementById('manualInput');
                 inputEl.value = totalValue.toFixed(2);
+
+                // Tüm lotları seç (opsiyonel ama kullanıcı deneyimi için iyi olabilir)
+                selectedLots = realBot.aktif_pozisyonlar.map((_, i) => i);
 
                 // Input alanını vurgula (Görsel geribildirim)
                 const originalBg = inputEl.style.backgroundColor;
@@ -1378,6 +1458,7 @@
                 }, 300);
 
                 calculatePreview();
+                updateUI(realBot.calculateRSI(), realBot.history[realBot.history.length - 1] > realBot.history[realBot.history.length - 5], true);
             }
         }
 
@@ -1674,9 +1755,14 @@
                     const saveBtnContent = isLocked ? '<i class="fa-solid fa-check text-green-400"></i>' : 'KAYDET';
                     const saveBtnClass = isLocked ? 'bg-green-500/10 border-green-500/30 cursor-default px-3' : 'bg-blue-600 hover:bg-blue-500 text-white px-2 active:scale-95';
 
+                    const isSelected = selectedLots.includes(index);
+
                     return `
-                    <tr data-lot-id="${index}" class="border-b border-slate-800/50 hover:bg-slate-800/40 transition group">
-                        <td class="py-3 pl-2 font-mono text-xs text-slate-500">#${index + 1}</td>
+                    <tr data-lot-id="${index}" class="border-b border-slate-800/50 hover:bg-slate-800/40 transition group ${isSelected ? 'bg-blue-900/20' : ''}">
+                        <td class="py-3 pl-2">
+                            <input type="checkbox" onclick="toggleLotSelection(${index})" ${isSelected ? 'checked' : ''} class="lot-checkbox rounded border-slate-700 bg-slate-900">
+                        </td>
+                        <td class="py-3 font-mono text-xs text-slate-500">#${index + 1}</td>
                         <td class="py-3 text-slate-300">$${lot.maliyet.toLocaleString()}</td>
                         <td class="py-3 text-slate-400 font-mono text-xs">${lot.miktar.toFixed(8)}</td>
                         <td class="py-3">
@@ -1696,9 +1782,9 @@
                             ${pSign}${profitPercent.toFixed(2)}%
                         </td>
                         <td class="py-3 pr-2 text-right">
-                            <button onclick="realBot.sellSpecificLot(${index}, ${profitPercent.toFixed(2)})" 
+                            <button onclick="realBot.sellSpecificLot(${index}, ${profitPercent.toFixed(2)}, true)" 
                                 class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-2 py-1 rounded text-[10px] border border-red-500/30 transition shadow-sm">
-                                KAPAT
+                                SAT
                             </button>
                         </td>
                     </tr>
